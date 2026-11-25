@@ -354,7 +354,9 @@ mod = ({context, t}) ->
       range: ~> @layout.get-node \view .getBoundingClientRect!
     }
 
-  destroy: -> if @tip => @tip.destroy!
+  destroy: ->
+    @stop!
+    if @tip => @tip.destroy!
 
   filter-dims: -> []
   interactions: -> {}
@@ -401,6 +403,8 @@ mod = ({context, t}) ->
     @layout.update false
     box = @layout.get-box \view
     [W, H] = [box.width, box.height]
+    # 不在畫面上 ( 被移除、隱藏 ) 時是 0: 不排版, 點的格距會變 0, 填點的迴圈跑不完
+    if !(W > 0 and H > 0) => return
     style = window.getComputedStyle @root
     fs = parseFloat(style.fontSize) or 14
     family = style.fontFamily or 'sans-serif'
@@ -569,6 +573,10 @@ mod = ({context, t}) ->
     step = Math.min.apply(Math, regs.map (r) -> Math.sqrt(r.area * 0.8 / (r.k * 0.866)))
     box = @layout.get-box \view
     step = step <? (Math.min(box.width, box.height) / 4)
+    # 格距要是正數, 不然下面的迴圈跑不完
+    if !(step > 0 and isFinite(step)) =>
+      @dots = []
+      return @_dots = new Map!
     all = circles.map((c) -> [c.x, c.y, c.r]) ++ bubbles.map((b) -> [b.x, b.y, b.r])
     x0 = Math.min.apply(Math, all.map -> it.0 - it.2)
     x1 = Math.max.apply(Math, all.map -> it.0 + it.2)

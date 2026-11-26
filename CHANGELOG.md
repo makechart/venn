@@ -1,5 +1,12 @@
 # Change Logs
 
+## v0.0.2
+
+ - fix: page hangs when the chart is removed or hidden in dot style. the view box is 0, so the dot grid step became 0
+   and the loop filling the grid never ended. skip layout when the view has no size, and bail out on a non-positive step
+ - stop the idle dot animation on `destroy`
+
+
 ## v0.0.1
 
  - init release: venn / euler diagram
